@@ -44,7 +44,7 @@ if(!ispassword){
 
 const token =jwt.sign({userId:user._id,username:user.username},"blog",{expiresIn:"1h"})
 
-res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
+// res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
 res.status(200).json({message:"successfully logged in",token});
    } catch (error) {
       res.status(500).json({message: error.message});

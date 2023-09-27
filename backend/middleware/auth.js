@@ -3,8 +3,9 @@ const cookieParser = require("cookie-parser");
 
 async function auth(req, res, next) { // Fixed the order of parameters
   try {
-    const token = req.cookies.token;
-   //  console.log(token);
+    const token = req.headers.authorization.split(" ")[1];
+    
+     console.log(token);
     if (!token) {
       return res.status(403).json({ message: "Invalid token, please login to get the token" });
     }
