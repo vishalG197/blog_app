@@ -1,13 +1,14 @@
+import { Button, Flex } from '@chakra-ui/react'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
 const Navbar = () => {
   return (
-    <div>
-        <Link to="/">Dashborad</Link>
-        <Link to="/Signup">SignUp</Link>
-        <Link to="/login">Login</Link>
-    </div>
+    <Flex justifyContent={"space-evenly"}>
+        <Button><Link to="/">Dashborad</Link></Button>
+        <Button><Link to="/Signup">SignUp</Link></Button>
+        <Button><Link to="/login">Login</Link></Button>
+    </Flex>
   )
 }
 
