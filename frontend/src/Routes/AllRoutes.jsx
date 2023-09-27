@@ -7,10 +7,10 @@ import Dashboard from '../pages/Dashboard'
 const AllRoutes = () => {
   return (
     <Routes>
-       
-      <Route path="/Signin" elements={<Login/>} />
-      <Route path="/Signup" elements={<Signup/>} />
-      <Route path="/Blogs" elements={<Dashboard/>} />
+       <Route path="/" element={<Dashboard/>} />
+      <Route path="/login" element={<Login/>} />
+      <Route path="/Signup" element={<Signup/>} />
+      
     </Routes>
   )
 }
