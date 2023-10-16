@@ -1,20 +1,20 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const BlogSchema = mongoose.Schema({
-   "username": String,
-  "title": String,
-  "content": String,
-  "category": String,
-  "date": Date,
-  "likes": Number,
-  "comments": [
-    {
-      "username": String,
-      "content": String,
-    },
-  ],
-});
+const blogSchema = mongoose.Schema(
+  {
+    username: { type: String },
+    title: { type: String },
+    content: { type: String },
+    category: { type: String },
+    date: { type:String },
+    likes: { type: Number },
+    comments: [{ username: String, content: String }],
+  },
+  {
+    versionkey: false,
+  }
+);
 
-const BlogModel = mongoose.model("blog", BlogSchema);
+const blogModel = mongoose.model("blog", blogSchema);
 
-module.exports = BlogModel;
+module.exports = blogModel;
