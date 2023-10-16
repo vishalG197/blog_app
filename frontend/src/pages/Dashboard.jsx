@@ -1,138 +1,341 @@
+
+
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-
 import {
   Box,
+  Flex,
+  Grid,
   Heading,
-  Button,
-  Input,
-  FormControl,
-  FormLabel,
+  Textarea,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+import { FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
+import { Select } from "@chakra-ui/react";
 import Card from "./Card";
-import { Textarea, Select } from "@chakra-ui/react";
-// import auth from '../../../backend/middleware/auth';
 
 const Dashboard = () => {
-  const [blogs, setBlogs] = useState([]);
-  
-  const [newBlogData, setNewBlogData] = useState({
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+  const [blogs, setblogs] = useState([]);
+  const [filterdblogs, setFilteredblogs] = useState([]);
+
+  const [category, setCategory] = useState("");
+  //console.log(category);
+  const [sortbyDate, setSortbydate] = useState("");
+  //console.log(sortbyDate)
+  const [searchQuerry, setSearchQuerry] = useState("");
+
+  const authtoken = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+  const [newBlogData, setNewblogdata] = useState({
     title: "",
     content: "",
-    category: "Entertainment", // Default category
+    category: "",
   });
 
-
-
-  const handleCreateSubmit = async () => {
+  const handleCreate = async (e) => {
+    // e.preventDefault();
     try {
-      const authToken = localStorage.getItem("token");
-      console.log(authToken);
-      // Make a POST request to create a new blog
+      const authtoken = localStorage.getItem("token");
+      //console.log(token)
+
       const response = await axios.post(
-        "https://blog-bzw0.onrender.com/api/blogs",
+        "https://blog-server-api-lz66.onrender.com/api/blogs",
         newBlogData,
         {
           headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json", // Set the content type to JSON
+            Authorization: `Bearer ${authtoken}`,
+            "content-type": "application/json",
           },
         }
       );
+      toast({
+        title: "Blog Posted successfully",
+        description: "Your blog has been posted.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      console.log("New blog created", response.data);
 
-      // Handle success, e.g., show a success message, update UI, etc.
-      console.log("New blog created:", response.data);
       fetchBlog();
-      // Close the create modal
-      // setIsCreating(false);
     } catch (error) {
-      // Handle errors, e.g., show an error message
-      console.error("Error creating new blog:", error);
+      console.log(error.message);
     }
   };
 
-  const fetchBlog = async () => {
-    const authToken = localStorage.getItem("token");
-    console.log(authToken);
-    // Include the token in the request headers
+  //========================================>
 
-    fetch("https://blog-bzw0.onrender.com/api/blogs", {
+  const fetchBlog = () => {
+    const authtoken = localStorage.getItem("token");
+    //console.log(token)
+
+    fetch("https://blog-server-api-lz66.onrender.com/api/blogs", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${authToken}`,
-        "content-type": "application/json",
+        Authorization: `Bearer ${authtoken}`,
       },
     })
       .then((res) => {
         return res.json();
       })
-      .then((response) => {
-        // Handle the response here
-        console.log(response.blog);
-        setBlogs(response.blog);
+      .then((res) => {
+        console.log(res.blog);
+        setblogs(res.blog);
       })
-      .catch((error) => {
-        // Handle errors here
-        console.error(error.message);
+      .catch((err) => {
+        console.log(err.message);
       });
+  };
+
+  const handlePostblogfunc = () => {
+    handleCreate();
+    onClose();
   };
 
   useEffect(() => {
     fetchBlog();
   }, []);
 
-  console.log(blogs);
+  useEffect(() => {
+    let filtered = [...blogs];
+
+    if (category) {
+      filtered = filtered.filter((blog) => blog.category === category);
+    }
+    if (sortbyDate === "asc") {
+      // filtered.sort((a, b) => {
+      //   return (+a.date) - (+b.date);
+      // });
+
+      filtered = filtered.slice().sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA - dateB;
+      });
+    }
+    if (sortbyDate === "desc") {
+      filtered = filtered.slice().sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB - dateA;
+      });
+    }
+
+    if (searchQuerry) {
+      filtered = filtered.filter((blog) =>
+        blog.title.toLowerCase().includes(searchQuerry.toLocaleLowerCase())
+      );
+    }
+
+    setFilteredblogs(filtered);
+  }, [category, sortbyDate, searchQuerry, blogs]);
+
+  //console.log(blogs);
 
   return (
     <div>
-      <Heading>Welcome to home page</Heading>
       <Box>
-        <FormControl mb={4}>
-          <FormLabel>Title</FormLabel>
-          <Input
-            type="text"
-            value={newBlogData.title}
-            onChange={(e) =>
-              setNewBlogData({ ...newBlogData, title: e.target.value })
-            }
-          />
-        </FormControl>
-        <FormControl mb={4}>
-          <FormLabel>Content</FormLabel>
-          <Textarea
-            value={newBlogData.content}
-            onChange={(e) =>
-              setNewBlogData({ ...newBlogData, content: e.target.value })
-            }
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Category</FormLabel>
-          <Select
-            value={newBlogData.category}
-            onChange={(e) =>
-              setNewBlogData({ ...newBlogData, category: e.target.value })
-            }
-          >
-            <option value="Entertainment">Entertainment</option>
-            <option value="Technology">Technology</option>
-            <option value="Travel">Travel</option>
-            {/* Add more categories as needed */}
-          </Select>
-        </FormControl>
-        <FormControl>
-          <Button bg={"blue.600"} color={"white"} onClick={handleCreateSubmit}>
-            Post Blog
-          </Button>
-        </FormControl>
-      </Box>
-      <Box>
-        {blogs.map((item) => (
-          <Card key={item._id} item={item} fetchBlog={fetchBlog} />
-        ))}
+        {authtoken ? (
+          <Box>
+            <Heading mb={6}>Welcome to Blog App</Heading>
+
+            <Box>
+              <Flex
+                justifyContent={"space-evenly"}
+                mr={"10%"}
+                ml={"10%"}
+                gap={4}
+                mb={4}
+              >
+                <Box bg={"teal"} color={"white"} width={200} pt={2} pb={2}>
+                  Blogs
+                </Box>
+
+                <Box>
+                  <Button onClick={onOpen} bg={"blue"} color={"white"}>
+                    Post Blog
+                  </Button>
+
+                  <Modal isOpen={isOpen} onClose={onClose}>
+                    <ModalOverlay />
+                    <ModalContent>
+                      <ModalHeader>Post your Blog</ModalHeader>
+                      <ModalCloseButton />
+                      <ModalBody>
+                        <Box border={"2px solid black"} padding={4}>
+                          <FormControl>
+                            <FormLabel>Title</FormLabel>
+                            <Input
+                              type="text"
+                              value={newBlogData.title}
+                              onChange={(e) => {
+                                setNewblogdata({
+                                  ...newBlogData,
+                                  title: e.target.value,
+                                });
+                              }}
+                              border={"2px solid black"}
+                            />
+                          </FormControl>
+
+                          <FormControl>
+                            <FormLabel>Content</FormLabel>
+                            <Textarea
+                              value={newBlogData.content}
+                              onChange={(e) => {
+                                setNewblogdata({
+                                  ...newBlogData,
+                                  content: e.target.value,
+                                });
+                              }}
+                              border={"2px solid black"}
+                            />
+                          </FormControl>
+
+                          <FormControl>
+                            <FormLabel>Category</FormLabel>
+                            <Select
+                              value={newBlogData.category}
+                              placeholder="Select option"
+                              onChange={(e) => {
+                                setNewblogdata({
+                                  ...newBlogData,
+                                  category: e.target.value,
+                                });
+                              }}
+                              border={"2px solid black"}
+                            >
+                              <option value="Business">BUSINESS</option>
+                              <option value="Tech">TECH</option>
+                              <option value="Lifestyle">LIFESTYLE</option>
+                              <option value="Entertainment">
+                                ENTERTAINMENT
+                              </option>
+                            </Select>
+                          </FormControl>
+                        </Box>
+                      </ModalBody>
+
+                      <ModalFooter>
+                        <Button
+                          colorScheme="blue"
+                          mr={3}
+                          onClick={handlePostblogfunc}
+                        >
+                          Post Bog
+                        </Button>
+                        <Button variant="ghost">Secondary Action</Button>
+                      </ModalFooter>
+                    </ModalContent>
+                  </Modal>
+                </Box>
+              </Flex>
+              <Box
+                mb={5}
+                border={"3px solid teal"}
+                padding={5}
+                marginLeft={"20%"}
+                marginRight={"20%"}
+              >
+                <Input
+                  placeholder={"Search by Title"}
+                  onChange={(e) => setSearchQuerry(e.target.value)}
+                />
+                <Box mt={3}>
+                  <Heading
+                    as={"h5"}
+                    size={"md"}
+                    display={"flex"}
+                    alignItems={"left"}
+                    mb={2}
+                  >
+                    Filter by Category
+                  </Heading>
+                  <Select
+                    value={category}
+                    onChange={(e) => {
+                      setCategory(e.target.value);
+                    }}
+                  >
+                    <option value={""}>All</option>
+                    <option value="Business">BUSINESS</option>
+                    <option value="Tech">TECH</option>
+                    <option value="Lifestyle">LIFESTYLE</option>
+                    <option value="Entertainment">ENTERTAINMENT</option>
+                  </Select>
+                </Box>
+                <Flex gap={3} mt={4} justifyContent={"space-evenly"}>
+                  <Heading
+                    as={"h5"}
+                    size={"md"}
+                    display={"flex"}
+                    alignItems={"left"}
+                    pt={2}
+                  >
+                    Sort By Date
+                  </Heading>
+                  <Grid
+                    gap={3}
+                    gridTemplateColumns={[
+                      "repeat(1, 1fr)",
+                      "repeat(1, 1fr)",
+                      "repeat(2, 1fr)",
+                    ]}
+                    justifyContent={"space-evenly"}
+                  >
+                    <Button
+                      bg={"teal.200"}
+                      onClick={() => setSortbydate("asc")}
+                    >
+                      Asc
+                    </Button>
+                    <Button
+                      bg={"teal.200"}
+                      onClick={() => setSortbydate("desc")}
+                    >
+                      Desc
+                    </Button>
+                  </Grid>
+                </Flex>
+              </Box>
+              <Grid
+                border={"2px solid green"}
+                gridTemplateColumns={[
+                  "repeat(1, 1fr)",
+                  "repeat(1, 1fr)",
+                  "repeat(1, 1fr)",
+                  "repeat(2, 1fr)",
+                ]}
+                alignContent={"center"}
+                alignItems={"center"}
+                justifyContent={"space-evenly"}
+              >
+                {filterdblogs.map((item) => (
+                  <Card key={item._id} item={item} fetchBlog={fetchBlog} />
+                ))}
+              </Grid>
+            </Box>
+          </Box>
+        ) : (
+          navigate("/login")
+        )}
       </Box>
     </div>
   );
 };
 
-export default Dashboard;
+export default Dashboard

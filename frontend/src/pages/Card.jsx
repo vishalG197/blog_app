@@ -1,48 +1,56 @@
-import React, { useState } from "react";
-import { Input } from "@chakra-ui/react";
+
 import {
   Box,
+  Flex,
   Heading,
+  Button,
   Text,
   Badge,
-  Flex,
-  Button,
+  Input,
+  Textarea,
+  Select,
+  useToast,
+  Avatar,
+} from "@chakra-ui/react";
+import { Icon } from "@chakra-ui/react";
+import { FaHeart } from "react-icons/fa";
+
+import { FormControl, FormLabel } from "@chakra-ui/react";
+import {
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalCloseButton,
-  ModalBody,
   ModalFooter,
-  FormControl,
-  FormLabel,
-  Textarea,
-  Select,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
+import React, { useState } from "react";
+
 const Card = ({ item, fetchBlog }) => {
+  const toast = useToast();
   const [comment, setComment] = useState([]);
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isediting, setIseditng] = useState(false);
+
   const [editedData, setEditedData] = useState({
     title: item.title,
     content: item.content,
     category: item.category,
   });
 
-  const handleEditClick = () => {
-    setIsEditing(true);
+  const handleEdit = () => {
+    setIseditng(true);
+    //onOpen()
   };
 
-  const handleSaveClick = () => {
-    //console.log(id)
+  const handlesaveclick = () => {
     try {
-      const authToken = localStorage.getItem("token");
-      console.log(authToken);
-      //patch("/blogs/:id/comment"
-      fetch(`https://blog-bzw0.onrender.com/api/blogs/${item._id}`, {
+      const authtoken = localStorage.getItem("token");
+      fetch(`https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}`, {
         method: "PATCH",
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${authtoken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify(editedData),
@@ -51,56 +59,37 @@ const Card = ({ item, fetchBlog }) => {
           return res.json();
         })
         .then((response) => {
-          // Handle the response here
           console.log(response);
         })
+
         .then(() => {
           fetchBlog();
+        })
+        .then(() => {
+          toast({
+            title: "Blog Edited successfully",
+            description: "Your blog has been edited succesfully.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        })
+        .catch((err) => {
+          console.log(err);
         });
     } catch (error) {
       console.log(error.message);
     }
-
-    setIsEditing(false);
+    setIseditng(false);
   };
 
-  const handleComment = (id) => {
+  const deleteBlog = () => {
     try {
-      const authToken = localStorage.getItem("token");
-      console.log(authToken);
-      //patch("/blogs/:id/comment"
-      fetch(`https://blog-bzw0.onrender.com/api/blogs/${id}/comment`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ content: comment }),
-      })
-        .then((res) => {
-          return res.json();
-        })
-        .then((response) => {
-          // Handle the response here
-          console.log(response);
-        })
-        .then(() => {
-          fetchBlog();
-        });
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  const deleteBlog = (id) => {
-    try {
-      const authToken = localStorage.getItem("token");
-      console.log(authToken);
-      //patch("/blogs/:id/comment"
-      fetch(`https://blog-bzw0.onrender.com/api/blogs/${id}`, {
+      const authtoken = localStorage.getItem("token");
+      fetch(`https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${authtoken}`,
           "content-type": "application/json",
         },
       })
@@ -108,195 +97,311 @@ const Card = ({ item, fetchBlog }) => {
           return res.json();
         })
         .then((response) => {
-          // Handle the response here
           console.log(response);
         })
         .then(() => {
+          toast({
+            title: "Blog deleted successfully",
+            description: "Your blog has been deleted succesfully.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        })
+
+        .then(() => {
           fetchBlog();
+        })
+
+        .catch((err) => {
+          console.log(err);
         });
     } catch (error) {
-      console.log(error.message);
+      console.log(error);
     }
   };
 
-  const handleLike = (id) => {
+  const handleComment = () => {
     try {
-      const authToken = localStorage.getItem("token");
-      console.log(authToken);
-      //patch("/blogs/:id/comment"
-      fetch(`https://blog-bzw0.onrender.com/api/blogs/${item._id}/like`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "content-type": "application/json",
-        },
-      })
+      const authtoken = localStorage.getItem("token");
+      fetch(
+        `https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}/comment`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${authtoken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ content: comment }),
+        }
+      )
         .then((res) => {
           return res.json();
         })
         .then((response) => {
-          // Handle the response here
           console.log(response);
         })
         .then(() => {
+          toast({
+            title: "Comment added successfully",
+            description: "Your comment has been added succesfully.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        })
+
+        .then(() => {
           fetchBlog();
+        })
+
+        .catch((err) => {
+          console.log(err);
         });
     } catch (error) {
-      console.log(error.message);
+      console.log(error);
+    }
+  };
+
+  const handleLike = () => {
+    try {
+      const authtoken = localStorage.getItem("token");
+      fetch(
+        `https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}/like`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${authtoken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ content: comment }),
+        }
+      )
+        .then((res) => {
+          return res.json();
+        })
+        .then((response) => {
+          console.log(response);
+        })
+        .then(() => {
+          toast({
+            title: "Blog liked ",
+            description: "",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        })
+
+        .then(() => {
+          fetchBlog();
+        })
+
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (error) {
+      console.log(error);
     }
   };
 
   return (
-    <div>
-      <Box
-        key={item._id}
-        borderWidth="1px"
-        borderRadius="lg"
-        overflow="hidden"
-        p={4}
-        m={4}
-        maxW="90%"
-        boxShadow="md"
-      >
-        <Flex justifyContent="space-between">
-          <Heading as="h2" fontSize="xl" mb={2}>
-            {item.title}
-          </Heading>
-          <Box>
-            <Button
-              colorScheme="teal"
-              size="sm"
-              mr={2}
-              onClick={() => {
-                handleEditClick();
-              }}
-            >
-              Edit
-            </Button>
-            <Button
-              colorScheme="red"
-              size="sm"
-              onClick={() => {
-                deleteBlog(item._id);
-              }}
-            >
-              Delete
-            </Button>
-          </Box>
-        </Flex>
-        <Text fontSize="md" color="gray.600" mb={4}>
-          {item.content}
-        </Text>
-        <Badge variant="outline" colorScheme="teal">
-          Category: {item.category}
-        </Badge>
-        <Text color="gray.500" fontSize="sm" mt={2}>
-          Date: {item.date}
-        </Text>
-        <Flex justifyContent={"space-between"}>
-          <Heading as="h2" size="md" color="red" fontWeight={"bold"} mt={2}>
-            Likes: {item.likes}
-          </Heading>
-          <Button
-            bg="teal.200"
-            onClick={() => {
-              handleLike();
-            }}
-          >
-            Like it
-          </Button>
+    <Box
+      key={item._id}
+      borderwidth="1px"
+      borderradius="1g"
+      overflow="hidden"
+      p={4}
+      maxW="90%"
+      boxshadow="md"
+      border={"2px solid brown"}
+      ml={"5%"}
+      mt={5}
+    >
+      <Flex justifyContent="space-between" mb={5}>
+        <Flex spacing="4">
+          <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
+            <Avatar name={item.username} src="#" />
+
+            <Box>
+              <Heading size="sm">{item.username}</Heading>
+              <Text>Creator of this Blog</Text>
+            </Box>
+          </Flex>
         </Flex>
 
-        <Flex justifyContent="space-between">
-          <Input
-            type="text"
-            placholder="Type your comment"
-            value={comment}
-            onChange={(e) => {
-              setComment(e.target.value);
-            }}
-          />
+        <Flex justifyContent={"space-evenly"} gap={2}>
           <Button
-            bg="orange.500"
+            bg={"teal"}
+            color={"white"}
             onClick={() => {
-              handleComment(item._id);
+              handleEdit();
             }}
           >
-            Comment
+            Edit
+          </Button>
+          <Modal
+            isOpen={isediting}
+            onClose={() => {
+              setIseditng(false);
+            }}
+          >
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Edit your Blog</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Box border={"2px solid black"} padding={4}>
+                  <FormControl>
+                    <FormLabel>Title</FormLabel>
+                    <Input
+                      type="text"
+                      value={editedData.title}
+                      onChange={(e) => {
+                        setEditedData({ ...editedData, title: e.target.value });
+                      }}
+                      border={"2px solid black"}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Content</FormLabel>
+                    <Textarea
+                      value={editedData.content}
+                      onChange={(e) => {
+                        setEditedData({
+                          ...editedData,
+                          content: e.target.value,
+                        });
+                      }}
+                      border={"2px solid black"}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      value={editedData.category}
+                      placeholder="Select option"
+                      onChange={(e) => {
+                        setEditedData({
+                          ...editedData,
+                          category: e.target.value,
+                        });
+                      }}
+                      border={"2px solid black"}
+                    >
+                      <option value="Business">Business</option>
+                      <option value="Tech">Tech</option>
+                      <option value="Lifestyle">Lifestyle</option>
+                      <option value="Entertainment">Entertainment</option>
+                    </Select>
+                  </FormControl>
+                </Box>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  onClick={() => {
+                    handlesaveclick();
+                  }}
+                >
+                  Submit
+                </Button>
+                <Button onClick={() => setIseditng(false)}>Cancel</Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+          <Button bg={"teal"} color={"white"} onClick={() => deleteBlog()}>
+            Delete
           </Button>
         </Flex>
-        <Flex justifyContent="space-between">
-          <Box mt={4}>
-            <Text fontWeight="bold">Comments:</Text>
-            {item.comments.map((comment, index) => (
-              <Box
-                key={index}
-                mt={2}
-                borderTop="1px"
-                borderColor="gray.300"
-                pt={2}
-              >
-                <Text>
-                  <span style={{ fontWeight: "bold", marginRight: "8px" }}>
-                    {comment.username}:
-                  </span>
-                  {comment.content}
-                </Text>
-              </Box>
-            ))}
-          </Box>
+      </Flex>
+
+      <Heading as="h2" fontSize="xl" mb={2}>
+        {item.title}
+      </Heading>
+      <Text fontSize="md" color={"black"} mb={4}>
+        {item.content}
+      </Text>
+
+      <Badge varient="outline" colorScheme="teal">
+        Category: {item.category}
+      </Badge>
+
+      <Text color={"black"} fontSize="sm" mt={2}>
+        Date: {item.date}
+      </Text>
+
+      <Flex justifyContent={"space-between"} mb={5}>
+        <Flex justifyContent={"space-between"} gap={2}>
+          <Heading as="h5" size={"md"} color={"red"} fontWeight="bold">
+            Likes:
+          </Heading>
+          <Text color={"orange"} fontWeight="bold">
+            {item.likes}
+          </Text>
         </Flex>
-      </Box>
-      {/* Edit Modal */}
-      <Modal isOpen={isEditing} onClose={() => setIsEditing(false)}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Edit Card</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <FormControl mb={4}>
-              <FormLabel>Title</FormLabel>
-              <Input
-                type="text"
-                value={editedData.title}
-                onChange={(e) =>
-                  setEditedData({ ...editedData, title: e.target.value })
-                }
-              />
-            </FormControl>
-            <FormControl mb={4}>
-              <FormLabel>Content</FormLabel>
-              <Textarea
-                value={editedData.content}
-                onChange={(e) =>
-                  setEditedData({ ...editedData, content: e.target.value })
-                }
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Category</FormLabel>
-              <Select
-                value={editedData.category}
-                onChange={(e) =>
-                  setEditedData({ ...editedData, category: e.target.value })
-                }
-              >
-                <option value="Entertainment">Entertainment</option>
-                <option value="Technology">Technology</option>
-                <option value="Travel">Travel</option>
-                {/* Add more categories as needed */}
-              </Select>
-            </FormControl>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="teal" mr={3} onClick={handleSaveClick}>
-              Save
-            </Button>
-            <Button onClick={() => setIsEditing(false)}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </div>
+
+        <Button
+          bg={"white"}
+          onClick={() => {
+            handleLike();
+          }}
+        >
+          <Icon as={FaHeart} color="red.500" fontSize="xl" />
+        </Button>
+      </Flex>
+
+      <Flex mt={2} gap={5} justifyContent={"space-between"}>
+        <Input
+          type="text"
+          placeholder="type youer comment"
+          value={comment}
+          onChange={(e) => {
+            setComment(e.target.value);
+          }}
+          border={"1px solid blue"}
+        />
+        <Button
+          bg="orange.500"
+          onClick={() => {
+            handleComment();
+          }}
+        >
+          Comment
+        </Button>
+      </Flex>
+
+      <Flex justifyContent={"space-between"}>
+        <Box mt={4}>
+          <Text fontWeight="bold" color={"green"} fontSize={"lg"}>
+            Comments:
+          </Text>
+          {item.comments.map((comment, index) => (
+            <Flex
+              border={"1px solid teal"}
+              key={index}
+              mt={2}
+              pt={2}
+              w={"100%"}
+              gap={5}
+              padding={2}
+            >
+              <Avatar name={comment.username} src="#" />
+              <Text>
+                <span style={{ fontWeight: "bold" }}>
+                  {comment.username + " "}:{" "}
+                </span>
+              </Text>
+              <Text>{comment.content}</Text>
+            </Flex>
+          ))}
+        </Box>
+      </Flex>
+    </Box>
   );
 };
 
