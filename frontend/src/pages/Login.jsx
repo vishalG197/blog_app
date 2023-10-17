@@ -1,6 +1,6 @@
 
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import {
   Box,
@@ -15,12 +15,15 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { Input, Button } from "@chakra-ui/react";
+import { AuthContext } from "../Routes/Auth_context";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const toast = useToast();
   const navigate = useNavigate();
+  const {setAuthstate}=useContext(AuthContext)
+
 
   const handleLogin = async () => {
     const data = {
@@ -30,14 +33,19 @@ const Login = () => {
 
     try {
       let res = await axios.post(
-        "https://blog-server-api-lz66.onrender.com/api/login",
+        "https://blogs-gvrb.onrender.com/api/login",
         // "localhost:3000/api/login",
         data
       );
-      console.log(res);
+      // console.log(res);
 
       const token = res.data.token;
       localStorage.setItem("token", token);
+      setAuthstate({
+        isAuth:true,
+        token:res.data.token,
+        user:res.data.user
+      })
 
       toast({
         title: "Logged in successfully",

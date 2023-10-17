@@ -25,7 +25,8 @@ import {
   ModalBody,
   ModalCloseButton,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "../Routes/Auth_context";
 
 const Card = ({ item, fetchBlog }) => {
   const toast = useToast();
@@ -39,6 +40,13 @@ const Card = ({ item, fetchBlog }) => {
     category: item.category,
   });
 
+  const {Authstate}=useContext(AuthContext)
+  // console.log(Authstate)
+
+  const [user,setUser]=useState(Authstate.user) 
+
+
+
   const handleEdit = () => {
     setIseditng(true);
     //onOpen()
@@ -47,7 +55,7 @@ const Card = ({ item, fetchBlog }) => {
   const handlesaveclick = () => {
     try {
       const authtoken = localStorage.getItem("token");
-      fetch(`https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}`, {
+      fetch(`https://blogs-gvrb.onrender.com/api/blogs/${item._id}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${authtoken}`,
@@ -86,7 +94,7 @@ const Card = ({ item, fetchBlog }) => {
   const deleteBlog = () => {
     try {
       const authtoken = localStorage.getItem("token");
-      fetch(`https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}`, {
+      fetch(`https://blogs-gvrb.onrender.com/api/blogs/${item._id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${authtoken}`,
@@ -125,7 +133,7 @@ const Card = ({ item, fetchBlog }) => {
     try {
       const authtoken = localStorage.getItem("token");
       fetch(
-        `https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}/comment`,
+        `https://blogs-gvrb.onrender.com/api/blogs/${item._id}/comment`,
         {
           method: "PATCH",
           headers: {
@@ -167,7 +175,7 @@ const Card = ({ item, fetchBlog }) => {
     try {
       const authtoken = localStorage.getItem("token");
       fetch(
-        `https://blog-server-api-lz66.onrender.com/api/blogs/${item._id}/like`,
+        `https://blogs-gvrb.onrender.com/api/blogs/${item._id}/like`,
         {
           method: "PATCH",
           headers: {
@@ -217,6 +225,8 @@ const Card = ({ item, fetchBlog }) => {
       border={"2px solid brown"}
       ml={"5%"}
       mt={5}
+      backgroundColor="white"
+      color="black"
     >
       <Flex justifyContent="space-between" mb={5}>
         <Flex spacing="4">
@@ -231,7 +241,7 @@ const Card = ({ item, fetchBlog }) => {
         </Flex>
 
         <Flex justifyContent={"space-evenly"} gap={2}>
-          <Button
+        {user.username==item.username? <Button
             bg={"teal"}
             color={"white"}
             onClick={() => {
@@ -239,7 +249,8 @@ const Card = ({ item, fetchBlog }) => {
             }}
           >
             Edit
-          </Button>
+          </Button>:""}
+          
           <Modal
             isOpen={isediting}
             onClose={() => {
@@ -314,9 +325,10 @@ const Card = ({ item, fetchBlog }) => {
               </ModalFooter>
             </ModalContent>
           </Modal>
-          <Button bg={"teal"} color={"white"} onClick={() => deleteBlog()}>
+          {user.username==item.username?  <Button bg={"teal"} color={"white"} onClick={() => deleteBlog()}>
             Delete
-          </Button>
+          </Button>:""}
+         
         </Flex>
       </Flex>
 

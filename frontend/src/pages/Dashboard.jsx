@@ -53,7 +53,7 @@ const Dashboard = () => {
       //console.log(token)
 
       const response = await axios.post(
-        "https://blog-server-api-lz66.onrender.com/api/blogs",
+        "https://blogs-gvrb.onrender.com/api/blogs",
         newBlogData,
         {
           headers: {
@@ -83,7 +83,7 @@ const Dashboard = () => {
     const authtoken = localStorage.getItem("token");
     //console.log(token)
 
-    fetch("https://blog-server-api-lz66.onrender.com/api/blogs", {
+    fetch("https://blogs-gvrb.onrender.com/api/blogs", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${authtoken}`,
@@ -93,8 +93,9 @@ const Dashboard = () => {
         return res.json();
       })
       .then((res) => {
-        console.log(res.blog);
-        setblogs(res.blog);
+        const data=res.blog.sort((a,b)=>(new Date(b.date)- new Date(a.date)))
+        console.log(data);
+        setblogs(data);
       })
       .catch((err) => {
         console.log(err.message);

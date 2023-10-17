@@ -32,7 +32,7 @@ const Signup = () => {
 
     try {
       let res = await axios.post(
-        "https://blog-server-api-lz66.onrender.com/api/register",
+        "https://blogs-gvrb.onrender.com/api/register",
         data
       );
       console.log(res);
